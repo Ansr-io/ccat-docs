@@ -86,15 +86,7 @@ userAgent="Curious Cat/$appVersion; (iPhone 10.2.1)"
 
 Passwordless authentication, achieved with 3 steps, 2 of which are http requests. 
 
-## request OTP 
-
-- username: Phone number in e164 format.
-- countryCode: ISO country code
-- os: android | ios 
-- deviceId: aaid | idfa 
-- doNotTrack: limitAdTracking
- 
-NB. requestId is required as input in the second request:
+## 1. request OTP 
 
 ```shell
 curl -A "$userAgent" -X POST $host/api/2/verify/generate \
@@ -106,7 +98,7 @@ curl -A "$userAgent" -X POST $host/api/2/verify/generate \
 -H "Content-type: application/json" \
 --data '{username:"+447534405065", countryCode:"GB", locale:"en_GB", deviceId:"7703AEB1-6AAD-483B-9999-D1116C02227B", os:"android", doNotTrack:"false", installReferrer:"utm_source%3Dpawoints_com%26utm_medium%3Dinstall_ctrl%26utm_content%3D302%26utm_campaign%3Dic1"}' 
 
-# response
+>
 {
     "meta":{"respondentPk":"N/A","uri":"/api/2/verify"},
     "status":"200",
@@ -115,26 +107,34 @@ curl -A "$userAgent" -X POST $host/api/2/verify/generate \
 }
 ```
 
+- username: Phone number in e164 format.
+- countryCode: ISO country code
+- os: android | ios 
+- deviceId: aaid | idfa 
+- doNotTrack: limitAdTracking
+ 
+NB. requestId is required as input in the second request:
+
+
 // TODO: Errors: 400, 409 
 
 
 
-## OTP is sent to phone number via SMS (or voice)
-
-Retrieve OTP
-
+## 2. OTP is sent to phone number via SMS (or voice)
 
 ```shell
 requestId="18b9b212b5444711a5f730cce7bf5633"
 otp="8272"
 ```
 
-## check OTP, requestId
+Retrieve OTP
+
+
+## 3. check OTP, requestId
 
 ```shell
 curl -A "$userAgent" $host/api/2/verify/check/$requestId/$otp
-
-# responds with status 200 or 201 (login or register)
+>
 {
     "username":"+447534405065",
     "roles":["ROLE_USER"],
@@ -143,72 +143,98 @@ curl -A "$userAgent" $host/api/2/verify/check/$requestId/$otp
     "access_token":"rg4p2omcerpgc5mu9d8j23tv6n02qnuk"
 }
 ```
+Responds with status 200 or 201 (login or register)
 
 // TODO: Errors: 400, 409
 
-
-# Requests
+## Auth token
 
 ```shell
 token="rg4p2omcerpgc5mu9d8j23tv6n02qnuk"
 ```
+Store the auth token
 
-## Task
 
-```shell
-    curl -A "$userAgent" -i -X GET $host/api/5/task -H "Authorization: Bearer $token"
+# Task
 
-    curl -A "$userAgent" -i -X GET "$host/api/5/task?os=android&osVersion=4.1.1&deviceId=e799d78a16c74877aab267058d9a4e3e&limitAdTracking=false&locale=en_GB" \
-    -H "Authorization: Bearer $token"
-```
-
-## Task item
-
+## List
 
 ```shell
-    curl -A "$userAgent" -i -X GET $host/api/5/task/$taskPk -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/5/task \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
 
-## Task link
+List all available tasks matched to the current user's profile.
+
+## List (deprecated)
+```shell
+curl -A "$userAgent" -i -X GET "$host/api/5/task?os=android&osVersion=4.1.1&deviceId=e799d78a16c74877aab267058d9a4e3e&limitAdTracking=false&locale=en_GB" \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
+``` 
+
+Inc. device profile query params (deprecated)
+
+## Item
+
+```shell
+curl -A "$userAgent" -i -X GET $host/api/5/task/$taskPk \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
+```
+
+// TODO: Error: 404, 410
+ 
+
+# Task link
+
+```shell
+$host/link/$taskPk/$respondentPk?[aaid=<android_aaid>|idfa=<apple_idfa>]
+```
 
 Task link endpoint will return an appropriate http response in order to allow e.g. start a survey or a download in a web browser.
 
 Client applications are expected to generate a link of the form:
 
-```shell
-    $host/link/$taskPk/$respondentPk?[aaid=<android_aaid>|idfa=<apple_idfa>]
-```
 
 ### important!
  
-If task.custom is not null, its contents must be serialized to a query string and appended to the task link.
+(deprecated) If task.custom is not null, its contents should be serialized to a query string and appended to the task link.
 
 Where task.custom is `@Nullable Map<String,String>`
 
 
+# TaskComplete
 
-## TaskComplete list
+## list
 
 ```shell
-    curl -A "$userAgent" -i -X GET $host/api/4/task/complete -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/4/task/complete \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
 
-## TaskComplete update
+## update
 
 ```shell
-  curl -A "$userAgent" -i -X POST $host/api/4/task/complete -H "Authorization: Bearer $token" \
-  --data '{taskPk:"b3b57392-5335-4565-8408-ec5a6bdc854f", status:"started"}'
+curl -A "$userAgent" -i -X POST $host/api/4/task/complete \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token" \
+--data '{taskPk:"b3b57392-5335-4565-8408-ec5a6bdc854f", status:"started"}'
 ```   
 
-## FlaggedTask
+# FlaggedTask
 
-### list
+## list
 
 ```shell
-    curl -A "$userAgent" -i -X GET $host/api/3/task/flagged -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/3/task/flagged \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
 
-### update
+## update
 
 ```shell
 # item 
@@ -224,13 +250,7 @@ curl -A "$userAgent" -i -X POST $host/api/3/task/flagged \
 --data '[{"reason":"other","respondentPk":"d1adada0-3afe-11e3-8934-d3a2b39befda","taskPk":"781318b4-7ef3-4491-a7bd-dc027bc7d876","text":"BISCUITS HEY"},{"reason":"an_error","respondentPk":"d1adada0-3afe-11e3-8934-d3a2b39befda","taskPk":"19efce98-2161-4ed9-9b89-fca14ec3de13","text":null, isDeleted:true}]'
 ```
 
-## Device
-
-Submit device profile.
-
-- deviceId (String): aaid on Android, idfa on iOS.
-- os (String): "android" or "ios"
-
+# Device profile
 
 ```shell
 curl -A "$userAgent" -i -X POST $host/api/2/device \
@@ -245,31 +265,40 @@ curl -A "$userAgent" -i -X POST $host/api/2/device \
 --data '{deviceId:"2f6480bd-1b36-40c1-ad12-49b2f5899de0", os:"android", doNotTrack:"false", locale:"en_GB"}'
 ```
 
+Submit device profile.
 
-## gcm: register for push notifications
+- deviceId (String): aaid on Android, idfa on iOS.
+- os (String): "android" or "ios"
+
+
+# Register for push notifications
 
 ```shell
 curl -A "$userAgent" -i -X POST $host/api/2/gcm \
 -H "Content-type: application/json" \
 -H "Authorization: Bearer $token" \
---data '{tokenValue:"dZqqpNgY5P4xAPA91bEM8C6ZtxG81dku46N-Gg_G-rBflV878-UN3qv5kSPRsSCM68vk5HCR9VW6bx3Fl9xHwN7gMUNEXWgDAXfK-uc_EfHhRvTQYLzn_BFmGq_zYB_2CjS9DVFoWfMdzDXGllwViX6W"}'
+--data '{tokenValue:"dZqqpNgY5P4xAPA91bEM8C6ZtxG81dku46N"}'
 ```
 
-## Balance
+# Balance
 
 ```shell
-curl -A "$userAgent" -i -X GET $host/api/3/balance -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/3/balance \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
+
+# Cashout
 
 ## Cashout products
 
 ```shell
-curl -A "$userAgent" -i -X GET $host/api/3/cashout/product -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/3/cashout/product \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
 
-## Cashout
-
-// with setup (paymentType, amount, point, exchangeRate, name?:"", userDetail?:"")
+## Cashout transaction
 
 ```shell
 # signature 
@@ -279,23 +308,29 @@ md5 -s "PayPal1.351351.0maximum amount with PayPaltim@ansr.io"
 curl -A "$userAgent" -X POST $host/api/2/cashout \
 -H "Content-type: application/json" \
 -H "Authorization: Bearer $token" \
---data '{"userDetail":"tim@ansr.io", "name":"maximum amount with PayPal","paymentType":"PayPal","points":135,"currencyCode":"GBP","amount":1.35,"exchangeRate":1.0,"signature":"5930df7c16ccd020954e6376209c5590"}'
-        
+--data '{"userDetail":"tim@ansr.io", "name":"maximum amount with PayPal",
+"paymentType":"PayPal","points":135,\"currencyCode":"GBP","amount":1.35,
+"exchangeRate":1.0,"signature":"5930df7c16ccd020954e6376209c5590"}'        
 ```
+
+// with setup (paymentType, amount, point, exchangeRate, name?:"", userDetail?:"")
+
 
 ## Cashout transaction history
 
 ```shell
-curl -A "$userAgent" -i -X GET $host/api/2/cashout/history -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/2/cashout/history \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
 
-## Preferences
+# Preferences
 
 Released in version 0.17
 
 The field "legacy" indicates that preferences have not yet been written i.e. that the user's client application is pre 0.17.x
 
-### Read
+## Read
 
 ```shell
 curl -A "$userAgent" -i -X GET $host/api/2/preferences \
@@ -310,9 +345,7 @@ curl -A "$userAgent" -i -X GET $host/api/2/preferences \
 }
 ```
 
-### Update
-
-NB. when update is first called 'legacy' is set to false
+## Update
 
 ```shell
 curl -A "$userAgent" -i -X PUT $host/api/2/preferences \
@@ -323,42 +356,60 @@ curl -A "$userAgent" -i -X PUT $host/api/2/preferences \
 # response: status 200
 ```
 
+NB. when update is first called 'legacy' is set to false
+
+
 # Error Types
+
+```java
+public enum PublicApiError {
+    exists,
+    save,
+    invalidUserAgent,
+    apiUpgradeNeeded,
+    fraudLock;
+}
+```
 
 Ref https://github.com/Ansr-io/ccat-plugins/blob/master/ccat-constants/src/main/java/io/ansr/ccat/PublicApiError.java
 
-```java
-    public enum PublicApiError {
-        exists,
-        save,
-        invalidUserAgent,
-        apiUpgradeNeeded,
-        fraudLock;
-    }
-```
-
 
 ## Invalid User Agent
+
+```shell
+{
+  "meta": {
+    "respondentPk": "N/A",
+    "uri": "/api/3/balance"
+  },
+  "status": "403",
+  "message": "Forbidden",
+  "data": {
+    "errorType": "invalidUserAgent"
+  }
+}
+```
 
 The API will return a '403 invalidUserAgent' response if an invalid userAgent header is detected.
 
 Example:
 
-```shell
-    {
-      "meta": {
-        "respondentPk": "N/A",
-        "uri": "/api/1/task"
-      },
-      "status": "403",
-      "message": "Forbidden",
-      "data": {
-        "errorType": "invalidUserAgent"
-      }
-    }
-```
 
 ## Force upgrade
+
+```shell
+{
+  "meta": {
+    "respondentPk": "N/A",
+    "uri": "/api/3/balance"
+  },
+  "status": "409",
+  "message": "Conflict",
+  "data": {
+    "errorType": "apiUpgradeNeeded"
+  }
+}
+```
 
 The API will return a '409 apiUpgradeNeeded' response if app version < required minimum version.
 
@@ -366,38 +417,25 @@ App version is obtained by parsing the userAgent header.
 
 Example:
 
-```shell
-    {
-      "meta": {
-        "respondentPk": "N/A",
-        "uri": "/api/1/respondent"
-      },
-      "status": "409",
-      "message": "Conflict",
-      "data": {
-        "errorType": "apiUpgradeNeeded"
-      }
-    }
-```
 
 ## Fraud Lock
 
+```shell
+{
+  "meta": {
+    "respondentPk": "N/A",
+    "uri": "/api/3/balance"
+  },
+  "status": "409",
+  "message": "Conflict",
+  "data": {
+    "errorType": "fraudLock"
+  }
+}
+```
+
 The API will return a '409 fraudLock' response if user account is locked.
 
-    sec_user.fraud_lock = 1;
+    `sec_user.fraud_lock = 1;`
 
 Example:
-
-```shell
-    {
-      "meta": {
-        "respondentPk": "N/A",
-        "uri": "/api/1/balance"
-      },
-      "status": "409",
-      "message": "Conflict",
-      "data": {
-        "errorType": "fraudLock"
-      }
-    }
-```

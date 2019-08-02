@@ -29,6 +29,24 @@ vagrant up
 
 You can now see the docs at http://localhost:4567
 
+
+### Build and publish 
+
+#### Static
+You can publish static documents to your own server using 
+
+```shell
+bundle exec middleman build --clean
+```
+
+Middleman will build your website to the build directory of your project, and you can copy those _static_ HTML files 
+to the server of your choice.
+
+#### Github pages 
+
+Run `./deploy.sh` to publish to github pages. WARNING: anything published to github pages is PUBLIC. 
+
+
 Learn more about [editing Slate markdown](https://github.com/lord/slate/wiki/Markdown-Syntax), 
 or [how to publish your docs](https://github.com/lord/slate/wiki/Deploying-Slate).
 
