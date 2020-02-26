@@ -22,7 +22,11 @@ dbPassword=0ndev1ce
 ```
 #### Please note 
 In order to start an app or run unit
- tests valid `GOOGLE_APPLICATION_CREDENTIALS` file has to be available. 
+ tests valid `GOOGLE_APPLICATION_CREDENTIALS` file has to be available.
+ 
+Blaster is using a patched version of https://github.com/budjb/grails-rabbitmq-native plugin to support failover.
+Our version is https://github.com/Ansr-io/ondevice-plugins/tree/master/grails-rabbitmq-native
+The plugin is packaged as a jar and is under `/lib` in Blaster.
 
 
 ### Message from rabbit queue examples
