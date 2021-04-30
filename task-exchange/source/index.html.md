@@ -29,6 +29,7 @@ This page was created with [Slate](https://github.com/lord/slate)
 
 ## Host
 Please note most API's are not publically available. Some are available via apache reverseproxy such as callback urls for task origins.
+
 ```shell
 # staging
 host="https://task-exchange-i.odbot.co.uk"
@@ -53,6 +54,11 @@ No authentication as this is not publically available. Requests are proxied thro
 
 List of available tasks based on the specified filter
 
+
+```shell
+    $host/api/1/task?country=GB&respondentPk=dd6fe43a-07a3-4006-80e5-e96437afbf15
+```
+
 Query Params
 
 |Param|Mandatory|Description|
@@ -72,6 +78,3 @@ Query Params
 |quality|false|The users current quality. Used for extra filtering such as not allowing low quality users to start tasks with a low number of completes|
 |risk|false|The users current risk. Used for extra filtering such as not allowing high risk users to start tasks with a low number of completes|
 
-```shell
-    $host/api/1/task?country=GB&respondentPk=dd6fe43a-07a3-4006-80e5-e96437afbf15
-```
