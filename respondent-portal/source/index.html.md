@@ -263,9 +263,96 @@ curl -A "$userAgent" -i -X GET $host/api/3/balance -H "Authorization: Bearer $to
 
 ## Cashout products
 
+
+## Cashout products V3 (Deprecated)
+
+
 ```shell
-curl -A "$userAgent" -i -X GET $host/api/3/cashout/product -H "Authorization: Bearer $token"
+curl -A "$userAgent" -i -X GET $host/api/3/cashout/product \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
 ```
+
+
+```json
+{
+  "meta": {
+    "respondentPk": "0e1c1de4-f899-4eeb-9459-1fd3d4e1cf5d",
+    "uri": "/api/3/cashout/product"
+  },
+  "status": "200",
+  "message": "Ok",
+  "data": {
+    "list": [
+      {
+        "productId": null,
+        "currencyCode": "GBP",
+        "points": 100,
+        "amount": "1.00",
+        "exchangeRate": "1.0",
+        "paymentType": "PayPal",
+        "name": "maximum amount with PayPal"
+      }
+    ],
+    "emailCashoutEnabled": "yes",
+    "balance": {
+      "balance": 100,
+      "canCashout": true
+    }
+  }
+}
+```
+
+## Cashout products V4
+
+
+```shell
+curl -A "$userAgent" -i -X GET $host/api/4/cashout/product \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $token"
+```
+
+
+```json
+{
+    "meta": {
+        "respondentPk": "0e1c1de4-f899-4eeb-9459-1fd3d4e1cf5d",
+        "uri": "/api/4/cashout/product"
+    },
+    "status": "200",
+    "message": "Ok",
+    "data": {
+        "list": [
+            {
+                "productId": null,
+                "currencyCode": "GBP",
+                "points": 100,
+                "amount": "1.00",
+                "exchangeRate": "1.0",
+                "paymentType": "PayPal",
+                "name": "maximum amount with PayPal",
+                "enabled": false,
+                "disabledStatus": "locked",
+                "description": "Cashout available in 3 days",
+                "lockExpires": "2021-05-25T00:00:00Z"
+            }
+        ],
+        "emailCashoutEnabled": "yes",
+        "balance": {
+            "balance": 100
+        }
+    }
+}
+```
+
+### Disabled Status
+
+Value      | Description
+----------- | -----------
+locked      | Exceeding the weekly cashout limit
+insufficient_balance   | Not earnt enough points
+manual_verification_required   | Exceeding max cashout limit
+
 
 ## Cashout
 
