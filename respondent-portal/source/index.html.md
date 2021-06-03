@@ -336,11 +336,6 @@ curl -A "$userAgent" -i -X GET $host/api/3/cashout/product \
 
 
 ```shell
-curl -A "$userAgent" -i -X GET $host/api/3/cashout/product \
--H "Content-type: application/json" \
--H "Authorization: Bearer $token"
-```
-
 curl -A "$userAgent" -i -X GET $host/api/4/cashout/product \
 -H "Content-type: application/json" \
 -H "Authorization: Bearer $token"
