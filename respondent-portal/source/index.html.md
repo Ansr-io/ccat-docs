@@ -340,10 +340,21 @@ curl -A "$userAgent" -i -X GET $host/api/4/cashout/product \
         "emailCashoutEnabled": "yes",
         "balance": {
             "balance": 100
+        },
+        "cashoutLimit": {
+          "increment": 400,
+          "amount": 400,
+          "nextIncrement": "2021-05-25T00:00:00Z"
         }
     }
 }
 ```
+
+### Cashout Limit
+
+- `increment` -  the weekly amount of points that become available to them to cashout
+- `amount` - the total amount of points able to cash out now if they have sufficient balance
+- `nextIncrement` - the next time the amount will be incremented by increment. When a user has been with us for another full week.
 
 ### Disabled Status
 
